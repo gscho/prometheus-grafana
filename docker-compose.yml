@@ -21,4 +21,4 @@ services:
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     env_file:
       - ./grafana/config.monitoring
-    # restart: always
+    restart: always
