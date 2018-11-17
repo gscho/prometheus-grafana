@@ -5,13 +5,13 @@ set -eu
 main() {
   need_cmd hab
   need_cmd openssl
-  need_cmd curl
+  need_cmd wget
 
   install_docker
   make_work_dirs
   clone_and_unpack
-  generate_passwd
   info "Installation Complete"
+  generate_passwd
 }
 
 docker_systemd_conf(){
@@ -63,12 +63,12 @@ SocketGroup=docker
 WantedBy=sockets.target
 EOF
 
-  mkdir -p /etc/systemd/system/docker.service.d
+#   mkdir -p /etc/systemd/system/docker.service.d
 
-  cat <<EOF > /etc/systemd/system/docker.service.d/proxy.conf
-[Service]
-Environment="HTTP_PROXY=http://proxyvipfmcc.nb.ford.com:83" "HTTPS_PROXY=http://proxyvipfmcc.nb.ford.com:83" "NO_PROXY=localhost,127.0.0.1,.ford.com,19.0.0.0/8,136.1.0.0/16,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.sock,.dev,chef-prod-smk-01.fmcc.ford.com,aplvc10.hplab1.ford.com,aplvc02.qa.hplab1.ford.com,ito000604.fhc.ford.com"
-EOF
+#   cat <<EOF > /etc/systemd/system/docker.service.d/proxy.conf
+# [Service]
+# Environment="HTTP_PROXY=http://proxyvipfmcc.nb.ford.com:83" "HTTPS_PROXY=http://proxyvipfmcc.nb.ford.com:83" "NO_PROXY=localhost,127.0.0.1,.ford.com,19.0.0.0/8,136.1.0.0/16,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.sock,.dev,chef-prod-smk-01.fmcc.ford.com,aplvc10.hplab1.ford.com,aplvc02.qa.hplab1.ford.com,ito000604.fhc.ford.com"
+# EOF
 
   systemctl daemon-reload
   systemctl enable docker
@@ -88,28 +88,31 @@ docker_groupadd(){
 
 install_docker() {
   hab pkg install core/docker -bf
-  hab pkg install core/docker-compose -bf
+  # hab pkg install core/docker-compose -bf
   docker_systemd_conf
   docker_groupadd
 }
 
 make_work_dirs() {
-  mkdir -p /opt/monitoring/prometheus/config
-  mkdir -p /opt/monitoring/prometheus/metrics
-  mkdir -p /opt/monitoring/grafana/data
-  mkdir -p /opt/monitoring/grafana/provisioning
+  mkdir -p /opt/monitoring
 }
 
 clone_and_unpack() {
-
+  pushd /opt/monitoring
+  wget -O - https://github.com/gscho/prometheus-grafana/tarball/master | tar --strip-components=1 -zx
+  popd
   info "unpacked prometheus-grafana to /opt/monitoring"
 }
 
 generate_passwd() {
   local _pw
-  _pw=$(openssl rand -base64 12)
-  sed -i -e 's/GF_SECURITY_ADMIN_PASSWORD=foobar/GF_SECURITY_ADMIN_PASSWORD=${_pw}/g' /opt/monitoring/grafana/config.monitoring
-  info "Password: ${_pw}"
+  _pw=$(openssl rand -base64 32)
+  cat <<EOF > /opt/monitoring/grafana/config.monitoring
+GF_SECURITY_ADMIN_PASSWORD=$_pw
+GF_USERS_ALLOW_SIGN_UP=false
+
+EOF
+  echo "PASSWORD=${_pw}"
 }
 
 need_cmd() {

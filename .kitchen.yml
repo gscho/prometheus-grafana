@@ -1,0 +1,18 @@
+driver:
+  name: docker
+  binary: /usr/local/bin/docker
+  use_sudo: false
+  provision_command: curl https://raw.githubusercontent.com/habitat-sh/habitat/master/components/hab/install.sh | bash
+
+provisioner:
+  name: shell
+  script: install.sh
+
+platforms:
+  - name: centos-7.2
+
+verifier:
+  name: inspec
+
+suites:
+  - name: default
