@@ -1,1 +1,5 @@
 .kitchen/
+prometheus/metrics/
+!prometheus/metrics/.keep
+grafana/data/
+!grafana/data/.keep
