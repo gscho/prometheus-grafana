@@ -3,7 +3,7 @@
 set -eu
 
 main() {
-  need_cmd hab
+  need_cmd hplab1
   need_cmd openssl
   need_cmd wget
 
@@ -67,7 +67,7 @@ EOF
 
 #   cat <<EOF > /etc/systemd/system/docker.service.d/proxy.conf
 # [Service]
-# Environment="HTTP_PROXY=http://proxyvipfmcc.nb.ford.com:83" "HTTPS_PROXY=http://proxyvipfmcc.nb.ford.com:83" "NO_PROXY=localhost,127.0.0.1,.ford.com,19.0.0.0/8,136.1.0.0/16,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.sock,.dev,chef-prod-smk-01.fmcc.ford.com,aplvc10.hplab1.ford.com,aplvc02.qa.hplab1.ford.com,ito000604.fhc.ford.com"
+# Environment="HTTP_PROXY=" "HTTPS_PROXY=" "NO_PROXY="
 # EOF
 
   systemctl daemon-reload
